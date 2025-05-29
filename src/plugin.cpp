@@ -1,14 +1,15 @@
 #include "events.h"
 #include "hooks.h"
 #include "log.h"
-
-namespace logger = SKSE::log;
+#include "settings.h"
 
 void OnDataLoaded()
 {
 	RE::UI* ui = RE::UI::GetSingleton();
 	Events::AddListeners(ui);
-	logger::info("Menu open/close event handler subscribed.");
+	Settings::LoadSettings();
+	Hooks::Install();
+	SKSE::log::info("Menu open/close event handler subscribed.");
 }
 
 void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
@@ -31,7 +32,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kNewGame:
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
-		logger::info("Data loaded!");
+		SKSE::log::info("Data loaded!");
 		OnDataLoaded();
 		break;
 	}
@@ -46,10 +47,6 @@ SKSEPluginLoad(const SKSE::LoadInterface *skse) {
 	if (!messaging->RegisterListener("SKSE", MessageHandler)) {
 		return false;
 	}
-
-	Hooks::Install();
-
-	SKSE::log::info("Hooks Installed.");
 	
     return true;
 }

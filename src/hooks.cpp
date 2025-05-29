@@ -1,5 +1,7 @@
 #include "hooks.h"
 
+#include "settings.h"
+
 namespace Hooks
 {
 	static bool isSprintDown = false;
@@ -22,7 +24,7 @@ namespace Hooks
 	void SprintHook::ProcessButton(RE::SprintHandler* a_this, RE::ButtonEvent* a_event, RE::PlayerControlsData* a_data)
 	{
 		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
-		float stamina = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
+		const float stamina = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
 
 		if (a_event->IsDown())
 		{
@@ -49,9 +51,6 @@ namespace Hooks
 
 	void MovementHook::ProcessThumbstick(RE::MovementHandler* a_this, RE::ThumbstickEvent* a_event, RE::PlayerControlsData* a_data)
 	{
-		// call original function so other plugins can hook this vfunc properly
-		_ProcessThumbstick(a_this, a_event, a_data);
-
 		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 		const float sumStickValue = abs(a_event->xValue) + abs(a_event->yValue);
 		const float stamina = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
@@ -60,17 +59,20 @@ namespace Hooks
 		{
 			if (stamina > 0.0f)
 			{
-				if (sumStickValue > 0.9f)
+				if (sumStickValue > 0.9f && Settings::variableMoveSpeed)
 				{
 					// If not sprinting, start sprinting
 					SetSprintForPlayer(player, true);
 				}
-				else if (sumStickValue > 0.0)
+				else if (sumStickValue > 0.0 && Settings::variableMoveSpeed)
 				{
 					SetSprintForPlayer(player, false);
-				} else
+				} else if (sumStickValue <= 0.0f)
 				{
-					isSprintDown = false;
+					if (!Settings::fullToggleMode)
+					{
+						isSprintDown = false;
+					}
 
 					SetSprintForPlayer(player, false);
 				}
@@ -78,21 +80,19 @@ namespace Hooks
 			{
 				// Out of stamina, flash stamina meter
 				FlashHudMenuMeter(26);
-
-				if (isSprintDown)
-				{
-					isSprintDown = false;
-				}
+				isSprintDown = false;
 
 				SetSprintForPlayer(player, false);
 			}
 		}
+
+		// call original function so other plugins can hook this vfunc properly
+		_ProcessThumbstick(a_this, a_event, a_data);
 	}
 
 	void Install()
 	{
-
-		SKSE::log::info("Hooking Movement");
+		SKSE::log::info("Hooking Movement and Sprint");
 
 		SprintHook::Hook();
 		MovementHook::Hook();
@@ -103,6 +103,6 @@ namespace Hooks
 		// Skip HUD meter flashing when out of stamina - we handle it ourselves
 		REL::safe_write(REL::ID{ 42350 }.address() + 0x350, std::uint8_t(0xEB));
 
-		SKSE::log::info("Hooking Movement Success!");
+		SKSE::log::info("Hooks Installed");
 	}
 }
