@@ -40,13 +40,6 @@ namespace Hooks
 				SetSprintForPlayer(player, false);
 			}
 		}
-		else if (a_event->IsPressed())
-		{
-			if (stamina > 0.0f)
-			{
-				//isSprintDown = !isSprintDown;
-			}
-		}
 	}
 
 	void MovementHook::ProcessThumbstick(RE::MovementHandler* a_this, RE::ThumbstickEvent* a_event, RE::PlayerControlsData* a_data)

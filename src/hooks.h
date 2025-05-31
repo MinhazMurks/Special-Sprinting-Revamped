@@ -1,12 +1,6 @@
 #pragma once
 namespace Hooks
 {
-    // class Vars
-    // {
-    // public:
-    // 	static bool isSprintDown;
-    // };
-
     class SprintHook
     {
     public:
