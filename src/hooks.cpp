@@ -79,9 +79,44 @@ namespace Hooks
 			}
 		}
 
-		// call original function so other plugins can hook this vfunc properly
+		// Call original function so other plugins can hook this vfunc properly
 		_ProcessThumbstick(a_this, a_event, a_data);
 	}
+
+	void MovementHook::ProcessButton(RE::MovementHandler* a_this, RE::ButtonEvent* a_event, RE::PlayerControlsData* a_data)
+	{
+		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
+		const float stamina = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
+
+		// Call original function so other plugins can hook this vfunc properly
+		_ProcessButton(a_this, a_event, a_data);
+
+		if (a_event->IsPressed())
+		{
+			SetSprintForPlayer(player, isSprintDown);
+
+			if (stamina > 0.0f)
+			{
+				SetSprintForPlayer(player, isSprintDown);
+			}
+			else if (stamina == 0.0f)
+			{
+				// Out of stamina, flash stamina meter
+				FlashHudMenuMeter(26);
+				SetSprintForPlayer(player, false);
+			}
+		}
+		else if (a_event->IsUp())
+		{
+			if (!Settings::fullToggleMode)
+			{
+				isSprintDown = false;
+			}
+
+			SetSprintForPlayer(player, false);
+		}
+	}
+
 
 	void Install()
 	{
