@@ -1,5 +1,7 @@
 #include "settings.h"
 #include <SKSE/Logger.h>
+
+#include "hooks.h"
 #include "SimpleIni.h"
 
 
@@ -20,16 +22,25 @@ namespace Settings
         if (error < 0)
         {
             SKSE::log::error("Failed to load settings file!");
-            fullToggleMode = true;
-            variableMoveSpeed = true;
+            fullToggleModeEnabled = true;
+            variableMoveSpeedEnabled = true;
             return;
         }
 
-        fullToggleMode = ini.GetBoolValue("General", "FullToggleMode", true);
-        variableMoveSpeed = ini.GetBoolValue("General", "VariableMoveSpeed", true);
+        toggleEnabled = ini.GetBoolValue("ToggleOptions", "ToggleEnabled", true);
+        fullToggleModeEnabled = ini.GetBoolValue("ToggleOptions", "FullToggleModeEnabled", true);
+        sprintAvailableInitially = ini.GetBoolValue("ToggleOptions", "SprintAvailableInitially", false);
 
-        SKSE::log::info("FullToggleMode: {}", fullToggleMode);
-        SKSE::log::info("VariableMoveSpeed: {}", variableMoveSpeed);
+        variableMoveSpeedEnabled = ini.GetBoolValue("VariableSpeedOptions", "VariableMoveSpeedEnabled", true);
+        sprintActivationThreshold = ini.GetDoubleValue("VariableSpeedOptions", "SprintActivationThreshold", 0.9);
+
+        sprintActivationThreshold = std::max(0.1, sprintActivationThreshold);
+        sprintActivationThreshold = std::min(1.2, sprintActivationThreshold);
+
+        Hooks::isSprintDown = sprintAvailableInitially;
+
+        SKSE::log::info("FullToggleModeEnabled: {}", fullToggleModeEnabled);
+        SKSE::log::info("VariableMoveSpeedEnabled: {}", variableMoveSpeedEnabled);
 
         SKSE::log::info("Settings loaded!");
     }

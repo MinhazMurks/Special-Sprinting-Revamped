@@ -3,10 +3,9 @@
 cmake_minimum_required(VERSION 3.21)
 
 # Set your project name. This will be the name of your SKSE .dll file.
-project(Special-Sprinting-Revamped VERSION 1.0.3 LANGUAGES CXX)
+project(Special-Sprinting-Revamped VERSION 1.1.3 LANGUAGES CXX)
 
 #
-
 # YOU DO NOT NEED TO EDIT ANYTHING BELOW HERE
 #
 # Please see the "Project setup" section of README.md
@@ -59,6 +58,7 @@ if(DEFINED OUTPUT_FOLDER)
 
     set (CONFIG_FOLDER "Template_Plugin")
     set(SRC_CONFIG_FOLDER "${CMAKE_SOURCE_DIR}/config")
+    set(SRC_CONFIGURATION_FOLDER "${CMAKE_SOURCE_DIR}/configuration")
     
     message(STATUS "SKSE plugin output folder: ${DLL_FOLDER}")
 
@@ -69,11 +69,20 @@ if(DEFINED OUTPUT_FOLDER)
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${DLL_FOLDER}/$<TARGET_FILE_NAME:${PROJECT_NAME}>"
         VERBATIM
     )
-    if (EXISTS "${SRC_CONFIG_FOLDER}")
+
+    add_custom_command(
+            TARGET "${PROJECT_NAME}"
+            POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E make_directory "${DLL_FOLDER}/"
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${DLL_FOLDER}/$<TARGET_FILE_NAME:${PROJECT_NAME}>"
+            VERBATIM
+    )
+
+    if (EXISTS "${SRC_CONFIGURATION_FOLDER}")
         add_custom_command(
             TARGET "${PROJECT_NAME}"
             POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/config" "${DLL_FOLDER}/${CONFIG_FOLDER}"
+            COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/configuration" "${DLL_FOLDER}/${PROJECT_NAME}"
             VERBATIM
         )
     endif()

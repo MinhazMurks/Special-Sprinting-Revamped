@@ -4,8 +4,6 @@
 
 namespace Hooks
 {
-	static bool isSprintDown = false;
-
 	void FlashHudMenuMeter(std::uint32_t a_meter)
 	{
 		using func_t = decltype(&FlashHudMenuMeter);
@@ -30,7 +28,10 @@ namespace Hooks
 		{
 			if (stamina > 0.0f)
 			{
-				isSprintDown = !isSprintDown;
+				if (Settings::toggleEnabled)
+				{
+					isSprintDown = !isSprintDown;
+				}
 				SetSprintForPlayer(player, isSprintDown);
 			}
 			else if (stamina == 0.0f)
@@ -45,24 +46,24 @@ namespace Hooks
 	void MovementHook::ProcessThumbstick(RE::MovementHandler* a_this, RE::ThumbstickEvent* a_event, RE::PlayerControlsData* a_data)
 	{
 		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
-		const float sumStickValue = abs(a_event->xValue) + abs(a_event->yValue);
+		const double sumStickValue = abs(a_event->xValue) + abs(a_event->yValue);
 		const float stamina = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kStamina);
 
 		if (isSprintDown)
 		{
 			if (stamina > 0.0f)
 			{
-				if (sumStickValue > 0.9f && Settings::variableMoveSpeed)
+				if (sumStickValue > Settings::sprintActivationThreshold && Settings::variableMoveSpeedEnabled)
 				{
 					// If not sprinting, start sprinting
 					SetSprintForPlayer(player, true);
 				}
-				else if (sumStickValue > 0.0 && Settings::variableMoveSpeed)
+				else if (sumStickValue > 0.0 && Settings::variableMoveSpeedEnabled)
 				{
 					SetSprintForPlayer(player, false);
 				} else if (sumStickValue <= 0.0f)
 				{
-					if (!Settings::fullToggleMode)
+					if (!Settings::fullToggleModeEnabled && Settings::toggleEnabled)
 					{
 						isSprintDown = false;
 					}
@@ -73,7 +74,10 @@ namespace Hooks
 			{
 				// Out of stamina, flash stamina meter
 				FlashHudMenuMeter(26);
-				isSprintDown = false;
+				if (Settings::toggleEnabled)
+				{
+					isSprintDown = false;
+				}
 
 				SetSprintForPlayer(player, false);
 			}
@@ -108,9 +112,12 @@ namespace Hooks
 		}
 		else if (a_event->IsUp())
 		{
-			if (!Settings::fullToggleMode)
+			if (!Settings::fullToggleModeEnabled)
 			{
-				isSprintDown = false;
+				if (Settings::toggleEnabled)
+				{
+					isSprintDown = false;
+				}
 			}
 
 			SetSprintForPlayer(player, false);

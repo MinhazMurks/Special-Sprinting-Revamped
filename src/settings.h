@@ -2,8 +2,12 @@
 
 namespace Settings
 {
-    inline bool fullToggleMode;
-    inline bool variableMoveSpeed;
+    inline bool toggleEnabled;
+    inline bool fullToggleModeEnabled;
+    inline bool sprintAvailableInitially;
+
+    inline bool variableMoveSpeedEnabled;
+    inline double sprintActivationThreshold;
 
     void LoadSettings();
 }

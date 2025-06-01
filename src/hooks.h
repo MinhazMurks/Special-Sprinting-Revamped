@@ -1,6 +1,8 @@
 #pragma once
 namespace Hooks
 {
+    inline bool isSprintDown;
+
     class SprintHook
     {
     public:
